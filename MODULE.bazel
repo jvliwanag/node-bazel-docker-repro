@@ -1,0 +1,19 @@
+bazel_dep(name = "rules_oci", version = "1.4.0")
+# For testing, we also recommend https://registry.bazel.build/modules/container_structure_test
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+
+# Declare external images you need to pull, for example:
+oci.pull(
+    name = "amazonlinux",
+    image = "amazonlinux",
+    # tag = "latest",
+    digest = "sha256:84acdf1bc33c2fa7d6f3b1c416f90836c2e37b3d18681b6db9f1b318afe71e63",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64/v8",
+    ],
+)
+
+# For each oci.pull call, repeat the "name" here to expose them as dependencies.
+use_repo(oci, "amazonlinux")

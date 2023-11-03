@@ -1,0 +1,39 @@
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_image_layer")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+
+js_binary(
+    name = "helloworld",
+    entry_point = "helloworld.js",
+)
+
+platform(
+    name = "arm64_linux",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ],
+)
+
+js_image_layer(
+    name = "layers",
+    binary = ":helloworld",
+    platform = ":arm64_linux",
+    root = "/app",
+)
+
+oci_image(
+    name = "image",
+    base = "@amazonlinux",
+    entrypoint = ["bash"],
+    cmd = ["/app/helloworld"],
+    workdir = "/app",
+    tars = [
+        ":layers",
+    ],
+)
+
+oci_tarball(
+    name = "oci_tarball",
+    image = ":image",
+    repo_tags = ["node-bazel-docker:latest"],
+)
